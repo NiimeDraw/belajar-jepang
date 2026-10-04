@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Belajar Menulis Hiragana Katakana Kanji</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper:#f7f4ed; --paper-2:#fffdf8; --ink:#1c1b18; --muted:#646059;
+      --line:#d8d1c5; --soft:#ebe5da; --red:#b63d31; --red-dark:#852a22;
+      --gold:#a87522; --green:#35674c; --shadow:0 18px 50px rgba(51,39,23,.10);
+      --serif:"Noto Serif JP",serif; --sans:"Noto Sans JP",sans-serif;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{--paper:#171613;--paper-2:#201f1b;--ink:#f3eee4;--muted:#b9b1a6;--line:#454039;--soft:#2d2a25;--red:#e06b5d;--red-dark:#f28b7f;--gold:#ddb15e;--green:#73ad89;--shadow:0 22px 55px rgba(0,0,0,.28)}
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);min-height:100vh}
+    button,input{font:inherit}
+    button{color:inherit}
+    .page{width:min(1440px,100%);margin:auto;padding:clamp(18px,3vw,42px)}
+    .intro{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:32px;align-items:end;margin:4px 0 26px}
+    .intro h1{font-family:var(--serif);font-size:clamp(34px,6vw,76px);line-height:.98;letter-spacing:-.045em;margin:0;max-width:900px}
+    .intro h1 em{font-style:normal;color:var(--red)}
+    .intro p{margin:0 0 7px;font-size:clamp(15px,1.6vw,18px);line-height:1.7;color:var(--muted);max-width:520px}
+    .nav-row{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 18px;border-bottom:1px solid var(--line);padding-bottom:12px}
+    .script-tab{border:0;background:transparent;padding:10px 14px;border-radius:7px;cursor:pointer;font-weight:700;color:var(--muted);display:flex;align-items:baseline;gap:8px}
+    .script-tab span{font-family:var(--serif);font-size:21px}
+    .script-tab.active{background:var(--ink);color:var(--paper-2)}
+    .workspace{display:grid;grid-template-columns:minmax(320px,.72fr) minmax(440px,1.28fr);gap:22px;align-items:start}
+    .library,.practice{background:var(--paper-2);border:1px solid var(--line);box-shadow:var(--shadow)}
+    .library{border-radius:8px 28px 8px 8px;min-height:690px;overflow:hidden}
+    .library-head{padding:20px 20px 14px;border-bottom:1px solid var(--line)}
+    .library-titleline{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:13px}
+    .library h2,.practice h2{margin:0;font-family:var(--serif);font-size:22px}
+    .count{font-size:12px;color:var(--muted)}
+    .search{position:relative}
+    .search input{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:11px 13px;color:var(--ink);outline:none}
+    .search input:focus{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 14%,transparent)}
+    .groups{display:flex;gap:6px;overflow-x:auto;padding:12px 20px 5px;scrollbar-width:none}
+    .groups::-webkit-scrollbar{display:none}
+    .chip{white-space:nowrap;border:1px solid var(--line);background:transparent;border-radius:99px;padding:7px 10px;font-size:12px;cursor:pointer;color:var(--muted)}
+    .chip.active{background:var(--red);border-color:var(--red);color:#fff}
+    .char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:15px 20px 22px;max-height:585px;overflow-y:auto}
+    .char-card{position:relative;min-height:82px;border:1px solid var(--line);background:var(--paper);border-radius:5px;padding:8px 6px 6px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s}
+    .char-card:hover{border-color:var(--red)}
+    .char-card.active{background:color-mix(in srgb,var(--red) 9%,var(--paper-2));border:2px solid var(--red);padding:7px 5px 5px}
+    .char-card.done::after{content:"✓";position:absolute;right:5px;top:4px;color:var(--green);font-size:11px;font-weight:900}
+    .glyph{display:block;font-family:var(--serif);font-size:34px;line-height:1.1}
+    .roman{display:block;color:var(--muted);font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .practice{border-radius:28px 8px 8px 8px;padding:clamp(18px,2.4vw,30px);position:sticky;top:18px}
+    .practice-head{display:flex;justify-content:space-between;gap:18px;align-items:start;margin-bottom:18px}
+    .selected-info{display:flex;align-items:center;gap:16px}
+    .selected-glyph{font-family:var(--serif);font-weight:900;font-size:60px;line-height:1;color:var(--red)}
+    .selected-meta strong{font-size:18px;display:block}
+    .selected-meta span{color:var(--muted);font-size:13px;line-height:1.5}
+    .shuffle{width:42px;height:42px;border-radius:50%;background:transparent;border:1px solid var(--line);cursor:pointer;font-size:20px}
+    .shuffle:hover{border-color:var(--red);color:var(--red)}
+    .canvas-wrap{position:relative;width:100%;aspect-ratio:1/1;max-height:610px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;touch-action:none;cursor:crosshair}
+    canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .grid-lines{position:absolute;inset:0;pointer-events:none;opacity:.72;background:linear-gradient(90deg,transparent calc(50% - .5px),var(--line) calc(50% - .5px),var(--line) calc(50% + .5px),transparent calc(50% + .5px)),linear-gradient(transparent calc(50% - .5px),var(--line) calc(50% - .5px),var(--line) calc(50% + .5px),transparent calc(50% + .5px));}
+    .grid-lines::after{content:"";position:absolute;inset:8%;border:1px dashed var(--line)}
+    .guide-char{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(190px,31vw,440px);font-weight:900;color:color-mix(in srgb,var(--ink) 12%,transparent);pointer-events:none;line-height:1;transform:translateY(-2%)}
+    .canvas-wrap.hide-guide .guide-char{display:none}
+    .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+    .tool{border:1px solid var(--line);background:transparent;border-radius:6px;padding:9px 12px;cursor:pointer;font-size:13px}
+    .tool:hover{border-color:var(--red);color:var(--red)}
+    .tool.primary{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+    .tool.active{background:var(--ink);color:var(--paper-2);border-color:var(--ink)}
+    .pen-size{display:flex;align-items:center;gap:8px;margin-left:auto;color:var(--muted);font-size:12px}
+    .pen-size input{accent-color:var(--red);width:100px}
+    .hint{margin:14px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+    .session{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+    .session strong{font-family:var(--serif);font-size:16px}
+    .session span{font-size:12px;color:var(--muted);display:block;margin-top:4px}
+    .meter{width:140px;height:8px;background:var(--soft);border-radius:99px;overflow:hidden}
+    .meter i{display:block;height:100%;width:0;background:var(--green);transition:width .3s}
+    .notes{margin:28px 0 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+    .note{background:var(--paper-2);padding:20px}
+    .note b{font-family:var(--serif);font-size:28px;color:var(--red);float:left;margin-right:12px;line-height:1}
+    .note strong{display:block;margin-bottom:4px}
+    .note p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+    .empty{grid-column:1/-1;padding:36px 8px;text-align:center;color:var(--muted)}
+    @media (max-width:900px){
+      .intro{grid-template-columns:1fr;gap:12px}.workspace{grid-template-columns:1fr}.practice{position:static;order:-1}.library{min-height:0}.char-grid{max-height:none}.notes{grid-template-columns:1fr}.canvas-wrap{max-width:620px;margin:auto}
+    }
+    @media (max-width:520px){
+      .page{padding:14px}.intro h1{font-size:40px}.intro p{font-size:14px}.nav-row{gap:4px}.script-tab{padding:9px 10px;font-size:12px}.script-tab span{font-size:18px}.practice{padding:16px;border-radius:20px 6px 6px}.selected-glyph{font-size:50px}.selected-meta strong{font-size:16px}.groups{flex-wrap:wrap;overflow:visible;padding-right:12px}.char-grid{grid-template-columns:repeat(4,1fr);padding:12px;gap:6px}.library-head{padding:16px}.groups{padding-left:12px}.char-card{min-height:72px}.glyph{font-size:29px}.pen-size{width:100%;margin-left:0;justify-content:space-between}.pen-size input{flex:1}.tools .tool{flex:1}.session{grid-template-columns:1fr}.meter{width:100%}.guide-char{font-size:56vw}}
+    @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="intro">
+      <h1>Latih tanganmu,<br><em>kenali bentuknya.</em></h1>
+      <p>Pilih karakter, ikuti panduan samar, lalu tulis berulang sampai gerakannya terasa alami. Mulai dari kana dasar atau kanji sehari-hari.</p>
+    </section>
+
+    <nav class="nav-row" aria-label="Pilih jenis aksara">
+      <button class="script-tab active" data-script="hiragana"><span>あ</span> Hiragana</button>
+      <button class="script-tab" data-script="katakana"><span>ア</span> Katakana</button>
+      <button class="script-tab" data-script="kanji"><span>漢</span> Kanji dasar</button>
+    </nav>
+
+    <section class="workspace">
+      <aside class="library">
+        <div class="library-head">
+          <div class="library-titleline"><h2 id="libraryTitle">Hiragana dasar</h2><span class="count" id="countLabel">46 karakter</span></div>
+          <label class="search"><input id="searchInput" type="search" placeholder="Cari romaji, karakter, atau arti…" autocomplete="off" aria-label="Cari karakter"></label>
+        </div>
+        <div class="groups" id="groupChips" aria-label="Filter kelompok"></div>
+        <div class="char-grid" id="charGrid"></div>
+      </aside>
+
+      <section class="practice">
+        <div class="practice-head">
+          <div class="selected-info">
+            <div class="selected-glyph" id="selectedGlyph">あ</div>
+            <div class="selected-meta"><strong id="selectedName">a</strong><span id="selectedDetail">Hiragana • vokal</span></div>
+          </div>
+          <button class="shuffle" id="shuffleBtn" title="Pilih karakter acak" aria-label="Pilih karakter acak">↻</button>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <div class="grid-lines"></div>
+          <div class="guide-char" id="guideChar">あ</div>
+          <canvas id="drawCanvas" aria-label="Area latihan menulis"></canvas>
+        </div>
+        <div class="tools">
+          <button class="tool active" id="penBtn">Pena</button>
+          <button class="tool" id="eraserBtn">Penghapus</button>
+          <button class="tool" id="guideBtn">Sembunyikan contoh</button>
+          <button class="tool" id="clearBtn">Bersihkan</button>
+          <button class="tool primary" id="doneBtn">Selesai latihan</button>
+          <label class="pen-size">Ukuran <input id="sizeRange" type="range" min="3" max="28" value="10" aria-label="Ukuran pena"></label>
+        </div>
+        <p class="hint">Gunakan jari, stylus, atau mouse untuk menulis. Cobalah menulis sekali dengan panduan, lalu sembunyikan contoh dan ulangi dari ingatan.</p>
+        <div class="session">
+          <div><strong>Progres sesi ini</strong><span id="progressText">0 dari 46 karakter sudah dilatih</span></div>
+          <div class="meter" aria-hidden="true"><i id="progressBar"></i></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="notes" aria-label="Tips latihan">
+      <article class="note"><b>一</b><strong>Gerak mantap</strong><p>Tarik garis dalam satu gerakan tenang. Jangan terlalu sering mengoreksi di tengah.</p></article>
+      <article class="note"><b>余</b><strong>Sisakan ruang</strong><p>Perhatikan jarak antarbagian dan pusat karakter, bukan hanya bentuk setiap garis.</p></article>
+      <article class="note"><b>反</b><strong>Ulang dari ingatan</strong><p>Setelah meniru dua kali, sembunyikan contoh. Ingatan gerak tumbuh saat kamu mencoba sendiri.</p></article>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      var kanaGroups={"Vokal":"vokal","K":"k","S":"s","T":"t","N":"n","H":"h","M":"m","Y":"y","R":"r","W + N":"w"};
+      function kana(chars, romans, groups){return chars.split('').map(function(c,i){return{char:c,name:romans[i],group:groups[i]};});}
+      var groupSeq=['vokal','vokal','vokal','vokal','vokal','k','k','k','k','k','s','s','s','s','s','t','t','t','t','t','n','n','n','n','n','h','h','h','h','h','m','m','m','m','m','y','y','y','r','r','r','r','r','w','w','w'];
+      var roman=['a','i','u','e','o','ka','ki','ku','ke','ko','sa','shi','su','se','so','ta','chi','tsu','te','to','na','ni','nu','ne','no','ha','hi','fu','he','ho','ma','mi','mu','me','mo','ya','yu','yo','ra','ri','ru','re','ro','wa','wo','n'];
+      var data={
+        hiragana:kana('あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん',roman,groupSeq),
+        katakana:kana('アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン',roman,groupSeq),
+        kanji:[
+          {char:'一',name:'ichi / hitotsu',meaning:'satu',group:'angka'},{char:'二',name:'ni / futatsu',meaning:'dua',group:'angka'},{char:'三',name:'san / mittsu',meaning:'tiga',group:'angka'},{char:'四',name:'shi, yon',meaning:'empat',group:'angka'},{char:'五',name:'go / itsutsu',meaning:'lima',group:'angka'},{char:'六',name:'roku / muttsu',meaning:'enam',group:'angka'},{char:'七',name:'shichi, nana',meaning:'tujuh',group:'angka'},{char:'八',name:'hachi / yattsu',meaning:'delapan',group:'angka'},{char:'九',name:'kyuu / kokonotsu',meaning:'sembilan',group:'angka'},{char:'十',name:'juu / too',meaning:'sepuluh',group:'angka'},
+          {char:'日',name:'nichi / hi',meaning:'hari, matahari',group:'alam'},{char:'月',name:'getsu / tsuki',meaning:'bulan',group:'alam'},{char:'火',name:'ka / hi',meaning:'api',group:'alam'},{char:'水',name:'sui / mizu',meaning:'air',group:'alam'},{char:'木',name:'moku / ki',meaning:'pohon, kayu',group:'alam'},{char:'金',name:'kin / kane',meaning:'emas, uang',group:'alam'},{char:'土',name:'do / tsuchi',meaning:'tanah',group:'alam'},{char:'山',name:'san / yama',meaning:'gunung',group:'alam'},{char:'川',name:'sen / kawa',meaning:'sungai',group:'alam'},{char:'空',name:'kuu / sora',meaning:'langit, kosong',group:'alam'},
+          {char:'人',name:'jin / hito',meaning:'orang',group:'sehari'},{char:'口',name:'kou / kuchi',meaning:'mulut',group:'sehari'},{char:'目',name:'moku / me',meaning:'mata',group:'sehari'},{char:'手',name:'shu / te',meaning:'tangan',group:'sehari'},{char:'足',name:'soku / ashi',meaning:'kaki',group:'sehari'},{char:'大',name:'dai / oo-kii',meaning:'besar',group:'sehari'},{char:'小',name:'shou / chii-sai',meaning:'kecil',group:'sehari'},{char:'上',name:'jou / ue',meaning:'atas',group:'arah'},{char:'下',name:'ka / shita',meaning:'bawah',group:'arah'},{char:'中',name:'chuu / naka',meaning:'tengah, dalam',group:'arah'},{char:'左',name:'sa / hidari',meaning:'kiri',group:'arah'},{char:'右',name:'yuu / migi',meaning:'kanan',group:'arah'},
+          {char:'学',name:'gaku / mana-bu',meaning:'belajar',group:'sekolah'},{char:'校',name:'kou',meaning:'sekolah',group:'sekolah'},{char:'先',name:'sen / saki',meaning:'depan, sebelumnya',group:'sekolah'},{char:'生',name:'sei / i-kiru',meaning:'hidup, lahir',group:'sekolah'},{char:'本',name:'hon / moto',meaning:'buku, asal',group:'sekolah'},{char:'文',name:'bun / fumi',meaning:'tulisan, kalimat',group:'sekolah'}
+        ]
+      };
+      var titles={hiragana:'Hiragana dasar',katakana:'Katakana dasar',kanji:'Kanji sehari-hari'};
+      var script='hiragana',selected=data.hiragana[0],group='semua',done={hiragana:{},katakana:{},kanji:{}};
+      var els={grid:document.getElementById('charGrid'),chips:document.getElementById('groupChips'),title:document.getElementById('libraryTitle'),count:document.getElementById('countLabel'),search:document.getElementById('searchInput'),glyph:document.getElementById('selectedGlyph'),name:document.getElementById('selectedName'),detail:document.getElementById('selectedDetail'),guide:document.getElementById('guideChar'),wrap:document.getElementById('canvasWrap'),progress:document.getElementById('progressText'),bar:document.getElementById('progressBar')};
+      function groupsFor(){return script==='kanji'?[['Semua','semua'],['Angka','angka'],['Alam','alam'],['Sehari-hari','sehari'],['Arah','arah'],['Sekolah','sekolah']]:[['Semua','semua']].concat(Object.keys(kanaGroups).map(function(k){return[k,kanaGroups[k]];}));}
+      function renderChips(){els.chips.innerHTML='';groupsFor().forEach(function(g){var b=document.createElement('button');b.className='chip'+(group===g[1]?' active':'');b.textContent=g[0];b.onclick=function(){group=g[1];renderChips();renderGrid();};els.chips.appendChild(b);});}
+      function filtered(){var q=els.search.value.trim().toLowerCase();return data[script].filter(function(x){return(group==='semua'||x.group===group)&&(!q||x.char.indexOf(q)>=0||x.name.toLowerCase().indexOf(q)>=0||(x.meaning||'').toLowerCase().indexOf(q)>=0);});}
+      function renderGrid(){var list=filtered();els.grid.innerHTML='';els.count.textContent=list.length+' karakter';if(!list.length){els.grid.innerHTML='<div class="empty">Karakter tidak ditemukan.</div>';return;}list.forEach(function(x){var b=document.createElement('button');b.className='char-card'+(x.char===selected.char?' active':'')+(done[script][x.char]?' done':'');b.innerHTML='<span class="glyph">'+x.char+'</span><span class="roman">'+(x.meaning||x.name)+'</span>';b.onclick=function(){selected=x;updateSelected();renderGrid();clearCanvas();};els.grid.appendChild(b);});}
+      function updateSelected(){els.glyph.textContent=selected.char;els.guide.textContent=selected.char;els.name.textContent=selected.name;els.detail.textContent=(script==='hiragana'?'Hiragana':script==='katakana'?'Katakana':'Kanji')+' • '+(selected.meaning||groupLabel(selected.group));}
+      function groupLabel(g){var labels={vokal:'vokal',k:'baris K',s:'baris S',t:'baris T',n:'baris N',h:'baris H',m:'baris M',y:'baris Y',r:'baris R',w:'baris W / N'};return labels[g]||g;}
+      function updateProgress(){var n=Object.keys(done[script]).length,total=data[script].length;els.progress.textContent=n+' dari '+total+' karakter sudah dilatih';els.bar.style.width=(n/total*100)+'%';}
+      document.querySelectorAll('.script-tab').forEach(function(b){b.onclick=function(){document.querySelectorAll('.script-tab').forEach(function(x){x.classList.remove('active');});b.classList.add('active');script=b.dataset.script;group='semua';selected=data[script][0];els.search.value='';els.title.textContent=titles[script];renderChips();renderGrid();updateSelected();updateProgress();clearCanvas();};});
+      els.search.addEventListener('input',renderGrid);
+      document.getElementById('shuffleBtn').onclick=function(){var list=filtered();if(!list.length)list=data[script];selected=list[Math.floor(Math.random()*list.length)];updateSelected();renderGrid();clearCanvas();};
+      document.getElementById('guideBtn').onclick=function(){els.wrap.classList.toggle('hide-guide');this.textContent=els.wrap.classList.contains('hide-guide')?'Tampilkan contoh':'Sembunyikan contoh';};
+      document.getElementById('doneBtn').onclick=function(){done[script][selected.char]=true;updateProgress();renderGrid();var list=data[script],i=list.indexOf(selected),next=list[(i+1)%list.length];setTimeout(function(){selected=next;updateSelected();renderGrid();clearCanvas();},220);};
+
+      var canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d'),drawing=false,mode='pen',size=10,strokes=[],current=null;
+      function fitCanvas(){var r=els.wrap.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);redraw();}
+      function redraw(){var r=canvas.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);ctx.lineCap='round';ctx.lineJoin='round';strokes.forEach(function(s){if(s.points.length<1)return;ctx.globalCompositeOperation=s.mode==='eraser'?'destination-out':'source-over';ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();ctx.lineWidth=s.size;ctx.beginPath();s.points.forEach(function(p,i){var x=p.x*r.width,y=p.y*r.height;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();});ctx.globalCompositeOperation='source-over';}
+      function point(e){var r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};}
+      canvas.addEventListener('pointerdown',function(e){drawing=true;canvas.setPointerCapture(e.pointerId);current={mode:mode,size:size,points:[point(e)]};strokes.push(current);redraw();});
+      canvas.addEventListener('pointermove',function(e){if(!drawing)return;current.points.push(point(e));redraw();});
+      function stop(){drawing=false;current=null;}canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);
+      function clearCanvas(){strokes=[];redraw();}
+      document.getElementById('clearBtn').onclick=clearCanvas;
+      document.getElementById('penBtn').onclick=function(){mode='pen';this.classList.add('active');document.getElementById('eraserBtn').classList.remove('active');};
+      document.getElementById('eraserBtn').onclick=function(){mode='eraser';this.classList.add('active');document.getElementById('penBtn').classList.remove('active');};
+      document.getElementById('sizeRange').oninput=function(){size=Number(this.value);};
+      window.addEventListener('resize',fitCanvas);if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);}
+      renderChips();renderGrid();updateSelected();updateProgress();requestAnimationFrame(fitCanvas);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+out/
+build/
+*.zip
+*.tar.gz
+sdk/
+jdk*/
+gradle*/
+.gradle-home/
+debug.keystore

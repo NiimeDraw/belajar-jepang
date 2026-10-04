@@ -6,6 +6,9 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="data:," />
   <title>Belajar Menulis Hiragana Katakana Kanji</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: light dark;
@@ -27,7 +30,21 @@
     .intro h1{font-family:var(--serif);font-size:clamp(34px,6vw,76px);line-height:.98;letter-spacing:-.045em;margin:0;max-width:900px}
     .intro h1 em{font-style:normal;color:var(--red)}
     .intro p{margin:0 0 7px;font-size:clamp(15px,1.6vw,18px);line-height:1.7;color:var(--muted);max-width:520px}
+    [hidden]{display:none!important}
+    .start-screen{padding:clamp(18px,3vw,30px) 0 16px;border-top:1px solid var(--line)}
+    .start-copy{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:18px}
+    .start-copy h2{font-family:var(--serif);font-size:clamp(24px,3vw,34px);margin:0}
+    .start-copy p{max-width:520px;margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+    .course-menu{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .course-card{min-height:210px;padding:22px;text-align:left;border:1px solid var(--line);background:var(--paper-2);box-shadow:var(--shadow);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;transition:border-color .15s,transform .15s}
+    .course-card:nth-child(1){border-radius:8px 28px 8px 8px}.course-card:nth-child(2){border-radius:8px}.course-card:nth-child(3){border-radius:28px 8px 8px 8px}
+    .course-card:hover{border-color:var(--red);transform:translateY(-2px)}
+    .course-glyph{font-family:var(--serif);font-size:58px;line-height:1;color:var(--red);margin-bottom:auto}
+    .course-card strong{font-family:var(--serif);font-size:22px;margin-top:22px}
+    .course-card small{font-size:12px;color:var(--muted);line-height:1.55;margin-top:6px}
     .nav-row{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 18px;border-bottom:1px solid var(--line);padding-bottom:12px}
+    .back-menu{border:1px solid var(--line);background:transparent;padding:10px 13px;border-radius:7px;cursor:pointer;font-weight:700;margin-right:auto}
+    .back-menu:hover{border-color:var(--red);color:var(--red)}
     .script-tab{border:0;background:transparent;padding:10px 14px;border-radius:7px;cursor:pointer;font-weight:700;color:var(--muted);display:flex;align-items:baseline;gap:8px}
     .script-tab span{font-family:var(--serif);font-size:21px}
     .script-tab.active{background:var(--ink);color:var(--paper-2)}
@@ -41,10 +58,14 @@
     .search{position:relative}
     .search input{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:11px 13px;color:var(--ink);outline:none}
     .search input:focus{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 14%,transparent)}
-    .groups{display:flex;gap:6px;overflow-x:auto;padding:12px 20px 5px;scrollbar-width:none}
-    .groups::-webkit-scrollbar{display:none}
+    .groups{display:flex;gap:7px;flex-wrap:wrap;padding:12px 20px 8px}
     .chip{white-space:nowrap;border:1px solid var(--line);background:transparent;border-radius:99px;padding:7px 10px;font-size:12px;cursor:pointer;color:var(--muted)}
     .chip.active{background:var(--red);border-color:var(--red);color:#fff}
+    .lesson-nav{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin:5px 20px 0;padding:12px 0 10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .lesson-nav button{border:1px solid var(--line);background:transparent;border-radius:6px;padding:8px 10px;cursor:pointer;font-size:12px}
+    .lesson-nav button:hover:not(:disabled){border-color:var(--red);color:var(--red)}
+    .lesson-nav button:disabled{opacity:.35;cursor:default}
+    .lesson-label{text-align:center;min-width:0}.lesson-label span{display:block;color:var(--muted);font-size:11px;margin-bottom:2px}.lesson-label strong{display:block;font-family:var(--serif);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:15px 20px 22px;max-height:585px;overflow-y:auto}
     .char-card{position:relative;min-height:82px;border:1px solid var(--line);background:var(--paper);border-radius:5px;padding:8px 6px 6px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s}
     .char-card:hover{border-color:var(--red)}
@@ -86,10 +107,10 @@
     .note p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
     .empty{grid-column:1/-1;padding:36px 8px;text-align:center;color:var(--muted)}
     @media (max-width:900px){
-      .intro{grid-template-columns:1fr;gap:12px}.workspace{grid-template-columns:1fr}.practice{position:static;order:-1}.library{min-height:0}.char-grid{max-height:none}.notes{grid-template-columns:1fr}.canvas-wrap{max-width:620px;margin:auto}
+      .intro{grid-template-columns:1fr;gap:12px}.start-copy{align-items:start;flex-direction:column}.course-menu{grid-template-columns:1fr}.course-card{min-height:150px}.course-card:nth-child(n){border-radius:8px}.workspace{grid-template-columns:1fr}.practice{position:static;order:-1}.library{min-height:0}.char-grid{max-height:none}.notes{grid-template-columns:1fr}.canvas-wrap{max-width:620px;margin:auto}
     }
     @media (max-width:520px){
-      .page{padding:14px}.intro h1{font-size:40px}.intro p{font-size:14px}.nav-row{gap:4px}.script-tab{padding:9px 10px;font-size:12px}.script-tab span{font-size:18px}.practice{padding:16px;border-radius:20px 6px 6px}.selected-glyph{font-size:50px}.selected-meta strong{font-size:16px}.groups{flex-wrap:wrap;overflow:visible;padding-right:12px}.char-grid{grid-template-columns:repeat(4,1fr);padding:12px;gap:6px}.library-head{padding:16px}.groups{padding-left:12px}.char-card{min-height:72px}.glyph{font-size:29px}.pen-size{width:100%;margin-left:0;justify-content:space-between}.pen-size input{flex:1}.tools .tool{flex:1}.session{grid-template-columns:1fr}.meter{width:100%}.guide-char{font-size:56vw}}
+      .page{padding:14px}.intro h1{font-size:40px}.intro p{font-size:14px}.course-card{min-height:138px;padding:18px}.course-glyph{font-size:46px}.course-card strong{margin-top:16px}.nav-row{gap:4px}.back-menu{width:100%;margin:0 0 4px;text-align:left}.script-tab{padding:9px 10px;font-size:12px;flex:1;justify-content:center}.script-tab span{font-size:18px}.practice{padding:16px;border-radius:20px 6px 6px}.selected-glyph{font-size:50px}.selected-meta strong{font-size:16px}.groups{padding-right:12px}.lesson-nav{margin-left:12px;margin-right:12px;grid-template-columns:1fr 1fr}.lesson-label{grid-column:1/-1;grid-row:1}.lesson-nav button{grid-row:2}.char-grid{grid-template-columns:repeat(4,1fr);padding:12px;gap:6px}.library-head{padding:16px}.groups{padding-left:12px}.char-card{min-height:72px}.glyph{font-size:29px}.pen-size{width:100%;margin-left:0;justify-content:space-between}.pen-size input{flex:1}.tools .tool{flex:1}.session{grid-template-columns:1fr}.meter{width:100%}.guide-char{font-size:56vw}}
     @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
@@ -100,19 +121,37 @@
       <p>Pilih karakter, ikuti panduan samar, lalu tulis berulang sampai gerakannya terasa alami. Mulai dari kana dasar atau kanji sehari-hari.</p>
     </section>
 
-    <nav class="nav-row" aria-label="Pilih jenis aksara">
+    <section class="start-screen" id="startScreen" aria-labelledby="startTitle">
+      <div class="start-copy">
+        <h2 id="startTitle">Mau belajar yang mana?</h2>
+        <p>Setiap aksara punya ruang belajar sendiri. Hiragana dan Katakana disusun berurutan dari vokal, lalu tiap baris bunyi.</p>
+      </div>
+      <div class="course-menu">
+        <button class="course-card" data-start-script="hiragana"><span class="course-glyph">あ</span><strong>Belajar Hiragana</strong><small>10 pelajaran: vokal, baris K, S, T, N, H, M, Y, R, dan W + N.</small></button>
+        <button class="course-card" data-start-script="katakana"><span class="course-glyph">ア</span><strong>Belajar Katakana</strong><small>10 pelajaran dengan urutan bunyi yang sama agar lebih mudah dibandingkan.</small></button>
+        <button class="course-card" data-start-script="kanji"><span class="course-glyph">漢</span><strong>Belajar Kanji</strong><small>Kanji dasar dikelompokkan menurut angka, alam, keseharian, arah, dan sekolah.</small></button>
+      </div>
+    </section>
+
+    <nav class="nav-row" id="courseNav" aria-label="Pilih jenis aksara" hidden>
+      <button class="back-menu" id="backMenu">← Menu awal</button>
       <button class="script-tab active" data-script="hiragana"><span>あ</span> Hiragana</button>
       <button class="script-tab" data-script="katakana"><span>ア</span> Katakana</button>
       <button class="script-tab" data-script="kanji"><span>漢</span> Kanji dasar</button>
     </nav>
 
-    <section class="workspace">
+    <section class="workspace" id="workspace" hidden>
       <aside class="library">
         <div class="library-head">
           <div class="library-titleline"><h2 id="libraryTitle">Hiragana dasar</h2><span class="count" id="countLabel">46 karakter</span></div>
           <label class="search"><input id="searchInput" type="search" placeholder="Cari romaji, karakter, atau arti…" autocomplete="off" aria-label="Cari karakter"></label>
         </div>
-        <div class="groups" id="groupChips" aria-label="Filter kelompok"></div>
+        <div class="groups" id="groupChips" aria-label="Urutan pelajaran"></div>
+        <div class="lesson-nav" id="lessonNav">
+          <button id="prevGroup" type="button">← Sebelumnya</button>
+          <div class="lesson-label"><span id="lessonKicker">Pelajaran 1 dari 10</span><strong id="lessonTitle">Vokal · a i u e o</strong></div>
+          <button id="nextGroup" type="button">Berikutnya →</button>
+        </div>
         <div class="char-grid" id="charGrid"></div>
       </aside>
 
@@ -145,7 +184,7 @@
       </section>
     </section>
 
-    <section class="notes" aria-label="Tips latihan">
+    <section class="notes" id="tips" aria-label="Tips latihan" hidden>
       <article class="note"><b>一</b><strong>Gerak mantap</strong><p>Tarik garis dalam satu gerakan tenang. Jangan terlalu sering mengoreksi di tengah.</p></article>
       <article class="note"><b>余</b><strong>Sisakan ruang</strong><p>Perhatikan jarak antarbagian dan pusat karakter, bukan hanya bentuk setiap garis.</p></article>
       <article class="note"><b>反</b><strong>Ulang dari ingatan</strong><p>Setelah meniru dua kali, sembunyikan contoh. Ingatan gerak tumbuh saat kamu mencoba sendiri.</p></article>
@@ -154,7 +193,18 @@
 
   <script>
     (function(){
-      var kanaGroups={"Vokal":"vokal","K":"k","S":"s","T":"t","N":"n","H":"h","M":"m","Y":"y","R":"r","W + N":"w"};
+      var kanaLessons=[
+        {label:'Vokal',value:'vokal',sounds:'a · i · u · e · o'},
+        {label:'Baris K',value:'k',sounds:'ka · ki · ku · ke · ko'},
+        {label:'Baris S',value:'s',sounds:'sa · shi · su · se · so'},
+        {label:'Baris T',value:'t',sounds:'ta · chi · tsu · te · to'},
+        {label:'Baris N',value:'n',sounds:'na · ni · nu · ne · no'},
+        {label:'Baris H',value:'h',sounds:'ha · hi · fu · he · ho'},
+        {label:'Baris M',value:'m',sounds:'ma · mi · mu · me · mo'},
+        {label:'Baris Y',value:'y',sounds:'ya · yu · yo'},
+        {label:'Baris R',value:'r',sounds:'ra · ri · ru · re · ro'},
+        {label:'Baris W + N',value:'w',sounds:'wa · wo · n'}
+      ];
       function kana(chars, romans, groups){return chars.split('').map(function(c,i){return{char:c,name:romans[i],group:groups[i]};});}
       var groupSeq=['vokal','vokal','vokal','vokal','vokal','k','k','k','k','k','s','s','s','s','s','t','t','t','t','t','n','n','n','n','n','h','h','h','h','h','m','m','m','m','m','y','y','y','r','r','r','r','r','w','w','w'];
       var roman=['a','i','u','e','o','ka','ki','ku','ke','ko','sa','shi','su','se','so','ta','chi','tsu','te','to','na','ni','nu','ne','no','ha','hi','fu','he','ho','ma','mi','mu','me','mo','ya','yu','yo','ra','ri','ru','re','ro','wa','wo','n'];
@@ -169,20 +219,27 @@
         ]
       };
       var titles={hiragana:'Hiragana dasar',katakana:'Katakana dasar',kanji:'Kanji sehari-hari'};
-      var script='hiragana',selected=data.hiragana[0],group='semua',done={hiragana:{},katakana:{},kanji:{}};
-      var els={grid:document.getElementById('charGrid'),chips:document.getElementById('groupChips'),title:document.getElementById('libraryTitle'),count:document.getElementById('countLabel'),search:document.getElementById('searchInput'),glyph:document.getElementById('selectedGlyph'),name:document.getElementById('selectedName'),detail:document.getElementById('selectedDetail'),guide:document.getElementById('guideChar'),wrap:document.getElementById('canvasWrap'),progress:document.getElementById('progressText'),bar:document.getElementById('progressBar')};
-      function groupsFor(){return script==='kanji'?[['Semua','semua'],['Angka','angka'],['Alam','alam'],['Sehari-hari','sehari'],['Arah','arah'],['Sekolah','sekolah']]:[['Semua','semua']].concat(Object.keys(kanaGroups).map(function(k){return[k,kanaGroups[k]];}));}
-      function renderChips(){els.chips.innerHTML='';groupsFor().forEach(function(g){var b=document.createElement('button');b.className='chip'+(group===g[1]?' active':'');b.textContent=g[0];b.onclick=function(){group=g[1];renderChips();renderGrid();};els.chips.appendChild(b);});}
+      var script='hiragana',selected=data.hiragana[0],group='vokal',done={hiragana:{},katakana:{},kanji:{}};
+      var els={grid:document.getElementById('charGrid'),chips:document.getElementById('groupChips'),title:document.getElementById('libraryTitle'),count:document.getElementById('countLabel'),search:document.getElementById('searchInput'),glyph:document.getElementById('selectedGlyph'),name:document.getElementById('selectedName'),detail:document.getElementById('selectedDetail'),guide:document.getElementById('guideChar'),wrap:document.getElementById('canvasWrap'),progress:document.getElementById('progressText'),bar:document.getElementById('progressBar'),lessonNav:document.getElementById('lessonNav'),lessonKicker:document.getElementById('lessonKicker'),lessonTitle:document.getElementById('lessonTitle'),prevGroup:document.getElementById('prevGroup'),nextGroup:document.getElementById('nextGroup'),start:document.getElementById('startScreen'),nav:document.getElementById('courseNav'),workspace:document.getElementById('workspace'),tips:document.getElementById('tips')};
+      function groupsFor(){return script==='kanji'?[['Semua','semua'],['Angka','angka'],['Alam','alam'],['Sehari-hari','sehari'],['Arah','arah'],['Sekolah','sekolah']]:kanaLessons.map(function(x,i){return[(i+1)+' '+x.label,x.value];});}
+      function renderChips(){els.chips.innerHTML='';groupsFor().forEach(function(g){var b=document.createElement('button');b.className='chip'+(group===g[1]?' active':'');b.textContent=g[0];b.onclick=function(){group=g[1];els.search.value='';selected=data[script].filter(function(x){return group==='semua'||x.group===group;})[0];renderChips();renderGrid();updateSelected();clearCanvas();};els.chips.appendChild(b);});updateLessonNav();}
+      function updateLessonNav(){if(script==='kanji'){els.lessonNav.hidden=true;return;}els.lessonNav.hidden=false;var i=kanaLessons.findIndex(function(x){return x.value===group;}),lesson=kanaLessons[i],items=data[script].filter(function(x){return x.group===group;}),finished=items.filter(function(x){return done[script][x.char];}).length;els.lessonKicker.textContent='Pelajaran '+(i+1)+' dari '+kanaLessons.length+' • '+finished+'/'+items.length+' selesai';els.lessonTitle.textContent=lesson.label+' · '+lesson.sounds;els.prevGroup.disabled=i===0;els.nextGroup.disabled=i===kanaLessons.length-1;}
       function filtered(){var q=els.search.value.trim().toLowerCase();return data[script].filter(function(x){return(group==='semua'||x.group===group)&&(!q||x.char.indexOf(q)>=0||x.name.toLowerCase().indexOf(q)>=0||(x.meaning||'').toLowerCase().indexOf(q)>=0);});}
       function renderGrid(){var list=filtered();els.grid.innerHTML='';els.count.textContent=list.length+' karakter';if(!list.length){els.grid.innerHTML='<div class="empty">Karakter tidak ditemukan.</div>';return;}list.forEach(function(x){var b=document.createElement('button');b.className='char-card'+(x.char===selected.char?' active':'')+(done[script][x.char]?' done':'');b.innerHTML='<span class="glyph">'+x.char+'</span><span class="roman">'+(x.meaning||x.name)+'</span>';b.onclick=function(){selected=x;updateSelected();renderGrid();clearCanvas();};els.grid.appendChild(b);});}
       function updateSelected(){els.glyph.textContent=selected.char;els.guide.textContent=selected.char;els.name.textContent=selected.name;els.detail.textContent=(script==='hiragana'?'Hiragana':script==='katakana'?'Katakana':'Kanji')+' • '+(selected.meaning||groupLabel(selected.group));}
       function groupLabel(g){var labels={vokal:'vokal',k:'baris K',s:'baris S',t:'baris T',n:'baris N',h:'baris H',m:'baris M',y:'baris Y',r:'baris R',w:'baris W / N'};return labels[g]||g;}
-      function updateProgress(){var n=Object.keys(done[script]).length,total=data[script].length;els.progress.textContent=n+' dari '+total+' karakter sudah dilatih';els.bar.style.width=(n/total*100)+'%';}
-      document.querySelectorAll('.script-tab').forEach(function(b){b.onclick=function(){document.querySelectorAll('.script-tab').forEach(function(x){x.classList.remove('active');});b.classList.add('active');script=b.dataset.script;group='semua';selected=data[script][0];els.search.value='';els.title.textContent=titles[script];renderChips();renderGrid();updateSelected();updateProgress();clearCanvas();};});
+      function updateProgress(){var n=Object.keys(done[script]).length,total=data[script].length;els.progress.textContent=n+' dari '+total+' karakter sudah dilatih';els.bar.style.width=(n/total*100)+'%';updateLessonNav();}
+      function setScript(nextScript){script=nextScript;group=script==='kanji'?'semua':'vokal';selected=data[script][0];els.search.value='';els.title.textContent=titles[script];document.querySelectorAll('.script-tab').forEach(function(x){x.classList.toggle('active',x.dataset.script===script);});renderChips();renderGrid();updateSelected();updateProgress();clearCanvas();requestAnimationFrame(fitCanvas);}
+      function enterCourse(nextScript){els.start.hidden=true;els.nav.hidden=false;els.workspace.hidden=false;els.tips.hidden=false;setScript(nextScript);window.scrollTo({top:document.getElementById('courseNav').offsetTop-10,behavior:'smooth'});}
+      function moveLesson(delta){if(script==='kanji')return;var i=kanaLessons.findIndex(function(x){return x.value===group;}),next=kanaLessons[i+delta];if(!next)return;group=next.value;selected=data[script].filter(function(x){return x.group===group;})[0];els.search.value='';renderChips();renderGrid();updateSelected();clearCanvas();}
+      document.querySelectorAll('[data-start-script]').forEach(function(b){b.onclick=function(){enterCourse(b.dataset.startScript);};});
+      document.querySelectorAll('.script-tab').forEach(function(b){b.onclick=function(){setScript(b.dataset.script);};});
+      document.getElementById('backMenu').onclick=function(){els.start.hidden=false;els.nav.hidden=true;els.workspace.hidden=true;els.tips.hidden=true;window.scrollTo({top:0,behavior:'smooth'});};
+      els.prevGroup.onclick=function(){moveLesson(-1);};els.nextGroup.onclick=function(){moveLesson(1);};
       els.search.addEventListener('input',renderGrid);
-      document.getElementById('shuffleBtn').onclick=function(){var list=filtered();if(!list.length)list=data[script];selected=list[Math.floor(Math.random()*list.length)];updateSelected();renderGrid();clearCanvas();};
+      document.getElementById('shuffleBtn').onclick=function(){var list=filtered();if(!list.length)list=data[script].filter(function(x){return group==='semua'||x.group===group;});selected=list[Math.floor(Math.random()*list.length)];updateSelected();renderGrid();clearCanvas();};
       document.getElementById('guideBtn').onclick=function(){els.wrap.classList.toggle('hide-guide');this.textContent=els.wrap.classList.contains('hide-guide')?'Tampilkan contoh':'Sembunyikan contoh';};
-      document.getElementById('doneBtn').onclick=function(){done[script][selected.char]=true;updateProgress();renderGrid();var list=data[script],i=list.indexOf(selected),next=list[(i+1)%list.length];setTimeout(function(){selected=next;updateSelected();renderGrid();clearCanvas();},220);};
+      document.getElementById('doneBtn').onclick=function(){done[script][selected.char]=true;updateProgress();renderGrid();var list=data[script].filter(function(x){return group==='semua'||x.group===group;}),i=list.indexOf(selected),next=list[(i+1)%list.length],lessonComplete=list.every(function(x){return done[script][x.char];});if(script!=='kanji'&&lessonComplete){var lessonIndex=kanaLessons.findIndex(function(x){return x.value===group;});if(lessonIndex<kanaLessons.length-1){group=kanaLessons[lessonIndex+1].value;next=data[script].filter(function(x){return x.group===group;})[0];}}setTimeout(function(){selected=next;renderChips();updateSelected();renderGrid();clearCanvas();},220);};
 
       var canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d'),drawing=false,mode='pen',size=10,strokes=[],current=null;
       function fitCanvas(){var r=els.wrap.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);redraw();}
@@ -197,7 +254,7 @@
       document.getElementById('eraserBtn').onclick=function(){mode='eraser';this.classList.add('active');document.getElementById('penBtn').classList.remove('active');};
       document.getElementById('sizeRange').oninput=function(){size=Number(this.value);};
       window.addEventListener('resize',fitCanvas);if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);}
-      renderChips();renderGrid();updateSelected();updateProgress();requestAnimationFrame(fitCanvas);
+      renderChips();renderGrid();updateSelected();updateProgress();
     })();
   </script>
 </body>

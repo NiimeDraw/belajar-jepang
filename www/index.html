@@ -361,16 +361,24 @@
           reviewNo++;
         }
         mods=mods.slice(0,500);
+        var originalExamples=mods.map(function(module){return(module.examples||[]).map(function(example){return example.slice();});});
+        function exampleRank(text){var hash=2166136261;for(var i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,16777619);}return hash>>>0;}
         mods.forEach(function(module,moduleIndex){
           var expanded=[],seen={};
-          (module.examples||[]).forEach(function(ex){addUniqueExample(expanded,ex,ex[3],seen);});
+          originalExamples[moduleIndex].forEach(function(ex){addUniqueExample(expanded,ex,ex[3],seen);});
           var candidates=[];
-          mods.forEach(function(other,otherIndex){if(otherIndex===moduleIndex)return;var score=other.kind===module.kind?3:other.category===module.category?2:other.category==='Ringkasan'?0:1;candidates.push({module:other,score:score,distance:Math.abs(otherIndex-moduleIndex)});});
-          candidates.sort(function(a,b){return b.score-a.score||a.distance-b.distance;});
-          candidates.some(function(entry){
-            (entry.module.examples||[]).forEach(function(ex){if(expanded.length<10)addUniqueExample(expanded,ex,'Contoh terkait · '+entry.module.title,seen);});
-            return expanded.length>=10;
+          mods.forEach(function(other,otherIndex){
+            if(otherIndex===moduleIndex||!originalExamples[otherIndex].length)return;
+            var score=other.kind===module.kind?3:other.category===module.category?2:other.category==='Ringkasan'?0:1;
+            candidates.push({module:other,index:otherIndex,score:score,rank:exampleRank(level+'|'+moduleIndex+'|'+otherIndex+'|'+other.title)});
           });
+          candidates.sort(function(a,b){return b.score-a.score||a.rank-b.rank;});
+          for(var pass=0;expanded.length<10&&pass<10;pass++){
+            candidates.forEach(function(entry){
+              var examples=originalExamples[entry.index];
+              if(expanded.length<10&&examples[pass])addUniqueExample(expanded,examples[pass],'Variasi · '+entry.module.title,seen);
+            });
+          }
           module.examples=expanded;
         });
         return mods;

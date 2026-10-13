@@ -127,7 +127,48 @@
     }
     @media (max-width:520px){
       .page{padding:14px}.intro h1{font-size:40px}.intro p{font-size:14px}.course-menu{grid-template-columns:1fr}.course-card{min-height:138px;padding:18px}.course-glyph{font-size:46px}.course-card strong{margin-top:16px}.menu-section-head{align-items:start;flex-direction:column;gap:3px}.jlpt-menu{grid-template-columns:1fr}.jlpt-card{min-height:112px}.jlpt-mark{font-size:28px}.material-topbar .back-menu{margin-right:0}.level-switch{width:100%}.level-switch button{flex:1;padding:9px 6px}.level-hero{gap:14px}.coverage{grid-template-columns:1fr}.coverage div,.coverage div:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.coverage div:last-child{border-bottom:0}.module-list{grid-template-columns:1fr}.module-btn:nth-child(odd){border-right:0}.topic-list{grid-template-columns:1fr}.lesson-panel{padding:19px 16px}.nav-row{gap:4px}.back-menu{width:100%;margin:0 0 4px;text-align:left}.script-tab{padding:9px 10px;font-size:12px;flex:1;justify-content:center}.script-tab span{font-size:18px}.practice{padding:16px;border-radius:20px 6px 6px}.selected-glyph{font-size:50px}.selected-meta strong{font-size:16px}.groups{padding-right:12px}.lesson-nav{margin-left:12px;margin-right:12px;grid-template-columns:1fr 1fr}.lesson-label{grid-column:1/-1;grid-row:1}.lesson-nav button{grid-row:2}.char-grid{grid-template-columns:repeat(4,1fr);padding:12px;gap:6px}.library-head{padding:16px}.groups{padding-left:12px}.char-card{min-height:72px}.glyph{font-size:29px}.pen-size{width:100%;margin-left:0;justify-content:space-between}.pen-size input{flex:1}.tools .tool{flex:1}.session{grid-template-columns:1fr}.meter{width:100%}.guide-char{font-size:56vw}}
-    @media (max-width:520px){.word-mode .char-grid{grid-template-columns:repeat(2,1fr)}.word-mode .canvas-wrap{aspect-ratio:1.35/1}.word-mode .guide-char{padding:10px}.catalog-summary{flex-direction:column;gap:5px}.module-tools{padding-left:12px;padding-right:12px}.module-filter{font-size:9px}.lesson-step{display:grid;grid-template-columns:1fr}.lesson-step button{width:100%}.source-note a{display:inline-block;margin:2px 0}}
+    /* Keep every grid/flex child shrinkable: long Japanese strings must never widen the page. */
+    .page,.intro>*,.start-copy>*,.course-menu>*,.workspace>*,.practice-head>*,.selected-info,.selected-meta,.study-layout>*,.level-hero>*,.catalog-summary>*{min-width:0}
+    .selected-meta,.selected-meta strong,.selected-meta span,.lesson-panel,.lesson-panel h3,.topic-list li,.example-row,.example-row b,.example-reading,.example-meaning,.source-note{overflow-wrap:anywhere}
+    img,svg,video,canvas{max-width:100%}
+    @media (max-width:700px){
+      .nav-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+      .nav-row .back-menu{grid-column:1/-1;width:100%;margin:0;text-align:left}
+      .script-tab{min-width:0;justify-content:center;padding:10px 8px}
+      .practice-head{align-items:flex-start}
+      .selected-info{flex:1}
+      .shuffle{flex:0 0 42px}
+      .tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+      .tools .tool{width:100%}
+      .pen-size{grid-column:1/-1;width:100%;margin-left:0;justify-content:space-between}
+      .pen-size input{flex:1;min-width:0}
+    }
+    @media (max-width:520px){
+      .word-mode .char-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .word-mode .canvas-wrap{aspect-ratio:1.35/1}
+      .word-mode .guide-char{padding:10px}
+      .word-mode .selected-glyph{display:none}
+      .word-mode .selected-meta strong{font-size:clamp(16px,6vw,22px);line-height:1.35;word-break:break-word}
+      .catalog-summary{flex-direction:column;gap:5px}
+      .module-tools{padding-left:12px;padding-right:12px}
+      .module-filter{font-size:9px}
+      .lesson-step{display:grid;grid-template-columns:1fr}
+      .lesson-step button{width:100%}
+      .source-note a{display:inline-block;margin:2px 0}
+    }
+    @media (max-width:360px){
+      .page{padding:10px}
+      .intro h1{font-size:34px}
+      .course-card{min-height:128px}
+      .practice{padding:13px 11px}
+      .char-grid{grid-template-columns:repeat(3,minmax(0,1fr));padding:10px;gap:5px}
+      .word-mode .char-grid{grid-template-columns:1fr}
+      .script-tab{font-size:11px;gap:5px}
+      .script-tab span{font-size:16px}
+      .tools{grid-template-columns:1fr}
+      .pen-size{grid-column:1}
+      .level-switch button{font-size:11px}
+    }
     @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>

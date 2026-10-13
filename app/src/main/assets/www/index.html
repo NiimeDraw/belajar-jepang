@@ -87,9 +87,16 @@
     .grid-lines{position:absolute;inset:0;pointer-events:none;opacity:.72;background:linear-gradient(90deg,transparent calc(50% - .5px),var(--line) calc(50% - .5px),var(--line) calc(50% + .5px),transparent calc(50% + .5px)),linear-gradient(transparent calc(50% - .5px),var(--line) calc(50% - .5px),var(--line) calc(50% + .5px),transparent calc(50% + .5px));}
     .grid-lines::after{content:"";position:absolute;inset:8%;border:1px dashed var(--line)}
     .guide-char{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(190px,31vw,440px);font-weight:900;color:color-mix(in srgb,var(--ink) 12%,transparent);pointer-events:none;line-height:1;transform:translateY(-2%)}
-    .canvas-wrap.hide-guide .guide-char{display:none}
-    .word-mode .canvas-wrap{aspect-ratio:1.65/1}
-    .word-mode .guide-char{font-size:var(--word-guide-size,72px);padding:18px;white-space:nowrap;transform:none}
+    .canvas-wrap.hide-guide .guide-char,.canvas-wrap.hide-guide .word-guide{display:none}
+    .word-canvas-grid{display:none}
+    .word-mode .canvas-wrap{aspect-ratio:auto;max-height:none;border:0;background:transparent;overflow:visible;touch-action:auto;cursor:default}
+    .word-mode .canvas-wrap>.grid-lines,.word-mode .canvas-wrap>.guide-char,.word-mode .canvas-wrap>canvas{display:none}
+    .word-mode .word-canvas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:10px}
+    .word-canvas-cell{position:relative;aspect-ratio:1;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;touch-action:none;cursor:crosshair}
+    .word-canvas-cell canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .word-canvas-cell .grid-lines{display:block}
+    .word-guide{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(58px,9vw,104px);font-weight:900;color:color-mix(in srgb,var(--ink) 12%,transparent);pointer-events:none;line-height:1}
+    .word-cell-index{position:absolute;top:7px;left:8px;z-index:2;color:var(--muted);font-size:10px;font-weight:700;pointer-events:none}
     .word-mode .char-grid{grid-template-columns:repeat(3,1fr)}
     .word-mode .char-card{min-height:92px;text-align:left;padding:10px}
     .word-mode .char-card.active{padding:9px}
@@ -145,8 +152,9 @@
     }
     @media (max-width:520px){
       .word-mode .char-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .word-mode .canvas-wrap{aspect-ratio:1.35/1}
-      .word-mode .guide-char{padding:10px}
+      .word-mode .canvas-wrap{aspect-ratio:auto}
+      .word-mode .word-canvas-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .word-guide{font-size:clamp(58px,22vw,84px)}
       .word-mode .selected-glyph{display:none}
       .word-mode .selected-meta strong{font-size:clamp(16px,6vw,22px);line-height:1.35;word-break:break-word}
       .catalog-summary{flex-direction:column;gap:5px}
@@ -238,6 +246,7 @@
           <button class="shuffle" id="shuffleBtn" title="Pilih karakter acak" aria-label="Pilih karakter acak">↻</button>
         </div>
         <div class="canvas-wrap" id="canvasWrap">
+          <div class="word-canvas-grid" id="wordCanvasGrid" aria-label="Kanvas latihan per huruf"></div>
           <div class="grid-lines"></div>
           <div class="guide-char" id="guideChar">あ</div>
           <canvas id="drawCanvas" aria-label="Area latihan menulis"></canvas>
@@ -471,13 +480,13 @@
       Object.keys(jlptData).forEach(function(level){jlptData[level].modules=buildResearchModules(level,jlptData[level].modules);});
       var titles={hiragana:'Hiragana dasar',katakana:'Katakana dasar',kanji:'Kanji sehari-hari',kotoba:'1.000 kotoba'};
       var script='hiragana',selected=data.hiragana[0],group='vokal',done={hiragana:{},katakana:{},kanji:{},kotoba:{}},currentLevel='N5',currentModule=0,moduleQuery='',moduleFilter='Semua',modulePage=0,modulePageSize=20;
-      var els={grid:document.getElementById('charGrid'),chips:document.getElementById('groupChips'),title:document.getElementById('libraryTitle'),count:document.getElementById('countLabel'),search:document.getElementById('searchInput'),glyph:document.getElementById('selectedGlyph'),name:document.getElementById('selectedName'),detail:document.getElementById('selectedDetail'),guide:document.getElementById('guideChar'),wrap:document.getElementById('canvasWrap'),progress:document.getElementById('progressText'),bar:document.getElementById('progressBar'),lessonNav:document.getElementById('lessonNav'),lessonKicker:document.getElementById('lessonKicker'),lessonTitle:document.getElementById('lessonTitle'),prevGroup:document.getElementById('prevGroup'),nextGroup:document.getElementById('nextGroup'),start:document.getElementById('startScreen'),nav:document.getElementById('courseNav'),workspace:document.getElementById('workspace'),tips:document.getElementById('tips'),material:document.getElementById('materialScreen'),levelSwitch:document.getElementById('levelSwitch'),levelKicker:document.getElementById('levelKicker'),levelTitle:document.getElementById('levelTitle'),levelDescription:document.getElementById('levelDescription'),levelOutcome:document.getElementById('levelOutcome'),levelCoverage:document.getElementById('levelCoverage'),catalogSummary:document.getElementById('catalogSummary'),moduleList:document.getElementById('moduleList'),moduleSearch:document.getElementById('moduleSearch'),moduleFilters:document.getElementById('moduleFilters'),modulePrev:document.getElementById('modulePrev'),moduleNext:document.getElementById('moduleNext'),modulePageLabel:document.getElementById('modulePageLabel'),lessonPanel:document.getElementById('lessonPanel')};
+      var els={grid:document.getElementById('charGrid'),chips:document.getElementById('groupChips'),title:document.getElementById('libraryTitle'),count:document.getElementById('countLabel'),search:document.getElementById('searchInput'),glyph:document.getElementById('selectedGlyph'),name:document.getElementById('selectedName'),detail:document.getElementById('selectedDetail'),guide:document.getElementById('guideChar'),wrap:document.getElementById('canvasWrap'),wordGrid:document.getElementById('wordCanvasGrid'),progress:document.getElementById('progressText'),bar:document.getElementById('progressBar'),lessonNav:document.getElementById('lessonNav'),lessonKicker:document.getElementById('lessonKicker'),lessonTitle:document.getElementById('lessonTitle'),prevGroup:document.getElementById('prevGroup'),nextGroup:document.getElementById('nextGroup'),start:document.getElementById('startScreen'),nav:document.getElementById('courseNav'),workspace:document.getElementById('workspace'),tips:document.getElementById('tips'),material:document.getElementById('materialScreen'),levelSwitch:document.getElementById('levelSwitch'),levelKicker:document.getElementById('levelKicker'),levelTitle:document.getElementById('levelTitle'),levelDescription:document.getElementById('levelDescription'),levelOutcome:document.getElementById('levelOutcome'),levelCoverage:document.getElementById('levelCoverage'),catalogSummary:document.getElementById('catalogSummary'),moduleList:document.getElementById('moduleList'),moduleSearch:document.getElementById('moduleSearch'),moduleFilters:document.getElementById('moduleFilters'),modulePrev:document.getElementById('modulePrev'),moduleNext:document.getElementById('moduleNext'),modulePageLabel:document.getElementById('modulePageLabel'),lessonPanel:document.getElementById('lessonPanel')};
       function groupsFor(){if(script==='kanji')return[['Semua','semua'],['Angka','angka'],['Alam','alam'],['Sehari-hari','sehari'],['Arah','arah'],['Sekolah','sekolah']];if(script==='kotoba')return kotobaCategories;return kanaLessons.map(function(x,i){return[(i+1)+' '+x.label,x.value];});}
       function renderChips(){els.chips.innerHTML='';groupsFor().forEach(function(g){var b=document.createElement('button');b.className='chip'+(group===g[1]?' active':'');b.textContent=g[0];b.onclick=function(){group=g[1];els.search.value='';selected=data[script].filter(function(x){return group==='semua'||x.group===group;})[0];renderChips();renderGrid();updateSelected();clearCanvas();};els.chips.appendChild(b);});updateLessonNav();}
       function updateLessonNav(){if(script==='kanji'||script==='kotoba'){els.lessonNav.hidden=true;return;}els.lessonNav.hidden=false;var i=kanaLessons.findIndex(function(x){return x.value===group;}),lesson=kanaLessons[i],items=data[script].filter(function(x){return x.group===group;}),finished=items.filter(function(x){return done[script][x.char];}).length;els.lessonKicker.textContent='Pelajaran '+(i+1)+' dari '+kanaLessons.length+' • '+finished+'/'+items.length+' selesai';els.lessonTitle.textContent=lesson.label+' · '+lesson.sounds;els.prevGroup.disabled=i===0;els.nextGroup.disabled=i===kanaLessons.length-1;}
       function filtered(){var q=els.search.value.trim().toLowerCase();return data[script].filter(function(x){return(group==='semua'||x.group===group)&&(!q||x.char.indexOf(q)>=0||x.name.toLowerCase().indexOf(q)>=0||(x.meaning||'').toLowerCase().indexOf(q)>=0);});}
       function renderGrid(){var list=filtered();els.grid.innerHTML='';els.count.textContent=list.length+(script==='kotoba'?' kotoba':' karakter');if(!list.length){els.grid.innerHTML='<div class="empty">'+(script==='kotoba'?'Kotoba':'Karakter')+' tidak ditemukan.</div>';return;}list.forEach(function(x){var b=document.createElement('button');b.className='char-card'+(x.char===selected.char?' active':'')+(done[script][x.char]?' done':'');b.innerHTML='<span class="glyph">'+esc(x.char)+'</span><span class="roman">'+esc(script==='kotoba'?x.name+' · '+x.meaning:(x.meaning||x.name))+'</span>';b.onclick=function(){selected=x;updateSelected();renderGrid();clearCanvas();};els.grid.appendChild(b);});}
-      function updateSelected(){els.glyph.textContent=selected.char;els.guide.textContent=selected.char;els.name.textContent=selected.name;els.detail.textContent=(script==='hiragana'?'Hiragana':script==='katakana'?'Katakana':script==='kotoba'?'Kotoba '+selected.level:'Kanji')+' • '+(selected.meaning||groupLabel(selected.group));updateWordGuideSize();}
+      function updateSelected(){els.glyph.textContent=selected.char;els.guide.textContent=selected.char;els.name.textContent=selected.name;els.detail.textContent=(script==='hiragana'?'Hiragana':script==='katakana'?'Katakana':script==='kotoba'?'Kotoba '+selected.level:'Kanji')+' • '+(selected.meaning||groupLabel(selected.group));renderWordCanvases();}
       function groupLabel(g){var labels={vokal:'vokal',k:'baris K',s:'baris S',t:'baris T',n:'baris N',h:'baris H',m:'baris M',y:'baris Y',r:'baris R',w:'baris W / N'};return labels[g]||g;}
       function updateProgress(){var n=Object.keys(done[script]).length,total=data[script].length;els.progress.textContent=n+' dari '+total+' '+(script==='kotoba'?'kotoba':'karakter')+' sudah dilatih';els.bar.style.width=(n/total*100)+'%';updateLessonNav();}
       function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -509,20 +518,36 @@
       document.getElementById('guideBtn').onclick=function(){els.wrap.classList.toggle('hide-guide');this.textContent=els.wrap.classList.contains('hide-guide')?'Tampilkan contoh':'Sembunyikan contoh';};
       document.getElementById('doneBtn').onclick=function(){done[script][selected.char]=true;updateProgress();renderGrid();var list=data[script].filter(function(x){return group==='semua'||x.group===group;}),i=list.indexOf(selected),next=list[(i+1)%list.length],lessonComplete=list.every(function(x){return done[script][x.char];});if((script==='hiragana'||script==='katakana')&&lessonComplete){var lessonIndex=kanaLessons.findIndex(function(x){return x.value===group;});if(lessonIndex<kanaLessons.length-1){group=kanaLessons[lessonIndex+1].value;next=data[script].filter(function(x){return x.group===group;})[0];}}setTimeout(function(){selected=next;renderChips();updateSelected();renderGrid();clearCanvas();},220);};
 
-      var canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d'),drawing=false,mode='pen',size=10,strokes=[],current=null;
-      function updateWordGuideSize(){if(script!=='kotoba'||!selected)return;var width=els.wrap.getBoundingClientRect().width||600,len=Array.from(selected.char).length,size=Math.max(22,Math.min(96,Math.floor(width/(len+1)*1.25)));els.wrap.style.setProperty('--word-guide-size',size+'px');}
-      function fitCanvas(){var r=els.wrap.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);updateWordGuideSize();redraw();}
-      function redraw(){var r=canvas.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);ctx.lineCap='round';ctx.lineJoin='round';strokes.forEach(function(s){if(s.points.length<1)return;ctx.globalCompositeOperation=s.mode==='eraser'?'destination-out':'source-over';ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();ctx.lineWidth=s.size;ctx.beginPath();s.points.forEach(function(p,i){var x=p.x*r.width,y=p.y*r.height;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();});ctx.globalCompositeOperation='source-over';}
-      function point(e){var r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};}
+      var canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d'),drawing=false,mode='pen',size=10,strokes=[],current=null,wordStates=[];
+      function drawStrokes(targetCtx,targetCanvas,list){var r=targetCanvas.getBoundingClientRect();targetCtx.clearRect(0,0,r.width,r.height);targetCtx.lineCap='round';targetCtx.lineJoin='round';list.forEach(function(s){if(s.points.length<1)return;targetCtx.globalCompositeOperation=s.mode==='eraser'?'destination-out':'source-over';targetCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();targetCtx.lineWidth=s.size;targetCtx.beginPath();s.points.forEach(function(p,i){var x=p.x*r.width,y=p.y*r.height;if(i===0)targetCtx.moveTo(x,y);else targetCtx.lineTo(x,y);});targetCtx.stroke();});targetCtx.globalCompositeOperation='source-over';}
+      function pointFor(e,targetCanvas){var r=targetCanvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};}
+      function bindWordCanvas(state){var target=state.canvas;target.addEventListener('pointerdown',function(e){state.drawing=true;target.setPointerCapture(e.pointerId);state.current={mode:mode,size:size,points:[pointFor(e,target)]};state.strokes.push(state.current);drawStrokes(state.ctx,target,state.strokes);});target.addEventListener('pointermove',function(e){if(!state.drawing)return;state.current.points.push(pointFor(e,target));drawStrokes(state.ctx,target,state.strokes);});function stopWord(){state.drawing=false;state.current=null;}target.addEventListener('pointerup',stopWord);target.addEventListener('pointercancel',stopWord);}
+      function renderWordCanvases(){
+        els.wordGrid.innerHTML='';wordStates=[];
+        if(script!=='kotoba'||!selected)return;
+        var letters=Array.from(selected.char);
+        letters.forEach(function(letter,index){
+          var cell=document.createElement('div');cell.className='word-canvas-cell';
+          cell.innerHTML='<span class="word-cell-index">'+(index+1)+' / '+letters.length+'</span><div class="grid-lines"></div><div class="word-guide">'+esc(letter)+'</div><canvas aria-label="Latihan huruf '+esc(letter)+', bagian '+(index+1)+' dari '+letters.length+'"></canvas>';
+          els.wordGrid.appendChild(cell);
+          var target=cell.querySelector('canvas'),state={canvas:target,ctx:target.getContext('2d'),strokes:[],current:null,drawing:false};wordStates.push(state);bindWordCanvas(state);
+        });
+        requestAnimationFrame(fitWordCanvases);
+      }
+      function fitWordCanvases(){var dpr=Math.min(window.devicePixelRatio||1,2);wordStates.forEach(function(state){var r=state.canvas.parentElement.getBoundingClientRect();state.canvas.width=Math.round(r.width*dpr);state.canvas.height=Math.round(r.height*dpr);state.ctx.setTransform(dpr,0,0,dpr,0,0);drawStrokes(state.ctx,state.canvas,state.strokes);});}
+      function fitCanvas(){if(script==='kotoba'){fitWordCanvases();return;}var r=els.wrap.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);redraw();}
+      function redraw(){drawStrokes(ctx,canvas,strokes);}
+      function redrawAll(){redraw();wordStates.forEach(function(state){drawStrokes(state.ctx,state.canvas,state.strokes);});}
+      function point(e){return pointFor(e,canvas);}
       canvas.addEventListener('pointerdown',function(e){drawing=true;canvas.setPointerCapture(e.pointerId);current={mode:mode,size:size,points:[point(e)]};strokes.push(current);redraw();});
       canvas.addEventListener('pointermove',function(e){if(!drawing)return;current.points.push(point(e));redraw();});
       function stop(){drawing=false;current=null;}canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);
-      function clearCanvas(){strokes=[];redraw();}
+      function clearCanvas(){strokes=[];wordStates.forEach(function(state){state.strokes=[];state.current=null;state.drawing=false;});redrawAll();}
       document.getElementById('clearBtn').onclick=clearCanvas;
       document.getElementById('penBtn').onclick=function(){mode='pen';this.classList.add('active');document.getElementById('eraserBtn').classList.remove('active');};
       document.getElementById('eraserBtn').onclick=function(){mode='eraser';this.classList.add('active');document.getElementById('penBtn').classList.remove('active');};
       document.getElementById('sizeRange').oninput=function(){size=Number(this.value);};
-      window.addEventListener('resize',fitCanvas);if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);}
+      window.addEventListener('resize',fitCanvas);if(document.fonts&&document.fonts.ready){document.fonts.ready.then(fitCanvas);}if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);}
       renderChips();renderGrid();updateSelected();updateProgress();
     })();
   </script>

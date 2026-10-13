@@ -6,9 +6,6 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="data:," />
   <title>Belajar Menulis Hiragana Katakana Kanji</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: light dark;
@@ -91,12 +88,20 @@
     .word-canvas-grid{display:none}
     .word-mode .canvas-wrap{aspect-ratio:auto;max-height:none;border:0;background:transparent;overflow:visible;touch-action:auto;cursor:default}
     .word-mode .canvas-wrap>.grid-lines,.word-mode .canvas-wrap>.guide-char,.word-mode .canvas-wrap>canvas{display:none}
-    .word-mode .word-canvas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:10px}
-    .word-canvas-cell{position:relative;aspect-ratio:1;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;touch-action:none;cursor:crosshair}
+    .word-mode .word-canvas-grid{display:block}
+    .word-canvas-nav{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:min(100%,560px);margin:0 auto 10px}
+    .word-canvas-nav button{width:42px;height:42px;border:1px solid var(--line);border-radius:6px;background:transparent;cursor:pointer;font-weight:800}
+    .word-canvas-nav button:hover:not(:disabled){border-color:var(--red);color:var(--red)}
+    .word-canvas-nav button:disabled{opacity:.35;cursor:default}
+    .word-canvas-status{text-align:center;min-width:0}
+    .word-canvas-status strong{display:block;font-family:var(--serif);font-size:18px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .word-canvas-status span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+    .word-canvas-cell{display:none;position:relative;width:min(100%,560px);aspect-ratio:1;margin:auto;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;touch-action:none;cursor:crosshair}
+    .word-canvas-cell.active{display:block}
     .word-canvas-cell canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     .word-canvas-cell .grid-lines{display:block}
-    .word-guide{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(58px,9vw,104px);font-weight:900;color:color-mix(in srgb,var(--ink) 12%,transparent);pointer-events:none;line-height:1}
-    .word-cell-index{position:absolute;top:7px;left:8px;z-index:2;color:var(--muted);font-size:10px;font-weight:700;pointer-events:none}
+    .word-guide{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(170px,31vw,380px);font-weight:900;color:color-mix(in srgb,var(--ink) 12%,transparent);pointer-events:none;line-height:1}
+    .word-cell-index{position:absolute;top:10px;left:12px;z-index:2;color:var(--muted);font-size:11px;font-weight:700;pointer-events:none}
     .word-mode .char-grid{grid-template-columns:repeat(3,1fr)}
     .word-mode .char-card{min-height:92px;text-align:left;padding:10px}
     .word-mode .char-card.active{padding:9px}
@@ -153,8 +158,8 @@
     @media (max-width:520px){
       .word-mode .char-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .word-mode .canvas-wrap{aspect-ratio:auto}
-      .word-mode .word-canvas-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-      .word-guide{font-size:clamp(58px,22vw,84px)}
+      .word-canvas-nav{gap:8px;margin-bottom:8px}
+      .word-guide{font-size:clamp(170px,62vw,300px)}
       .word-mode .selected-glyph{display:none}
       .word-mode .selected-meta strong{font-size:clamp(16px,6vw,22px);line-height:1.35;word-break:break-word}
       .catalog-summary{flex-direction:column;gap:5px}
@@ -518,23 +523,39 @@
       document.getElementById('guideBtn').onclick=function(){els.wrap.classList.toggle('hide-guide');this.textContent=els.wrap.classList.contains('hide-guide')?'Tampilkan contoh':'Sembunyikan contoh';};
       document.getElementById('doneBtn').onclick=function(){done[script][selected.char]=true;updateProgress();renderGrid();var list=data[script].filter(function(x){return group==='semua'||x.group===group;}),i=list.indexOf(selected),next=list[(i+1)%list.length],lessonComplete=list.every(function(x){return done[script][x.char];});if((script==='hiragana'||script==='katakana')&&lessonComplete){var lessonIndex=kanaLessons.findIndex(function(x){return x.value===group;});if(lessonIndex<kanaLessons.length-1){group=kanaLessons[lessonIndex+1].value;next=data[script].filter(function(x){return x.group===group;})[0];}}setTimeout(function(){selected=next;renderChips();updateSelected();renderGrid();clearCanvas();},220);};
 
-      var canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d'),drawing=false,mode='pen',size=10,strokes=[],current=null,wordStates=[];
+      var canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d'),drawing=false,mode='pen',size=10,strokes=[],current=null,wordStates=[],activeWordIndex=0;
       function drawStrokes(targetCtx,targetCanvas,list){var r=targetCanvas.getBoundingClientRect();targetCtx.clearRect(0,0,r.width,r.height);targetCtx.lineCap='round';targetCtx.lineJoin='round';list.forEach(function(s){if(s.points.length<1)return;targetCtx.globalCompositeOperation=s.mode==='eraser'?'destination-out':'source-over';targetCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();targetCtx.lineWidth=s.size;targetCtx.beginPath();s.points.forEach(function(p,i){var x=p.x*r.width,y=p.y*r.height;if(i===0)targetCtx.moveTo(x,y);else targetCtx.lineTo(x,y);});targetCtx.stroke();});targetCtx.globalCompositeOperation='source-over';}
       function pointFor(e,targetCanvas){var r=targetCanvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};}
       function bindWordCanvas(state){var target=state.canvas;target.addEventListener('pointerdown',function(e){state.drawing=true;target.setPointerCapture(e.pointerId);state.current={mode:mode,size:size,points:[pointFor(e,target)]};state.strokes.push(state.current);drawStrokes(state.ctx,target,state.strokes);});target.addEventListener('pointermove',function(e){if(!state.drawing)return;state.current.points.push(pointFor(e,target));drawStrokes(state.ctx,target,state.strokes);});function stopWord(){state.drawing=false;state.current=null;}target.addEventListener('pointerup',stopWord);target.addEventListener('pointercancel',stopWord);}
+      function showWordCanvas(index){
+        if(!wordStates.length)return;
+        activeWordIndex=Math.max(0,Math.min(index,wordStates.length-1));
+        wordStates.forEach(function(state,i){state.cell.classList.toggle('active',i===activeWordIndex);});
+        var current=wordStates[activeWordIndex];
+        current.statusChar.textContent=current.letter;
+        current.statusCount.textContent='Huruf '+(activeWordIndex+1)+' dari '+wordStates.length;
+        current.prev.disabled=activeWordIndex===0;
+        current.next.disabled=activeWordIndex===wordStates.length-1;
+        requestAnimationFrame(fitWordCanvases);
+      }
       function renderWordCanvases(){
-        els.wordGrid.innerHTML='';wordStates=[];
+        els.wordGrid.innerHTML='';wordStates=[];activeWordIndex=0;
         if(script!=='kotoba'||!selected)return;
-        var letters=Array.from(selected.char);
+        var letters=Array.from(selected.char),nav=document.createElement('div');
+        nav.className='word-canvas-nav';
+        nav.innerHTML='<button type="button" aria-label="Huruf sebelumnya">←</button><div class="word-canvas-status"><strong></strong><span></span></div><button type="button" aria-label="Huruf berikutnya">→</button>';
+        els.wordGrid.appendChild(nav);
+        var prev=nav.firstElementChild,next=nav.lastElementChild,statusChar=nav.querySelector('strong'),statusCount=nav.querySelector('span');
+        prev.onclick=function(){showWordCanvas(activeWordIndex-1);};next.onclick=function(){showWordCanvas(activeWordIndex+1);};
         letters.forEach(function(letter,index){
           var cell=document.createElement('div');cell.className='word-canvas-cell';
           cell.innerHTML='<span class="word-cell-index">'+(index+1)+' / '+letters.length+'</span><div class="grid-lines"></div><div class="word-guide">'+esc(letter)+'</div><canvas aria-label="Latihan huruf '+esc(letter)+', bagian '+(index+1)+' dari '+letters.length+'"></canvas>';
           els.wordGrid.appendChild(cell);
-          var target=cell.querySelector('canvas'),state={canvas:target,ctx:target.getContext('2d'),strokes:[],current:null,drawing:false};wordStates.push(state);bindWordCanvas(state);
+          var target=cell.querySelector('canvas'),state={cell:cell,canvas:target,ctx:target.getContext('2d'),strokes:[],current:null,drawing:false,letter:letter,prev:prev,next:next,statusChar:statusChar,statusCount:statusCount};wordStates.push(state);bindWordCanvas(state);
         });
-        requestAnimationFrame(fitWordCanvases);
+        showWordCanvas(0);
       }
-      function fitWordCanvases(){var dpr=Math.min(window.devicePixelRatio||1,2);wordStates.forEach(function(state){var r=state.canvas.parentElement.getBoundingClientRect();state.canvas.width=Math.round(r.width*dpr);state.canvas.height=Math.round(r.height*dpr);state.ctx.setTransform(dpr,0,0,dpr,0,0);drawStrokes(state.ctx,state.canvas,state.strokes);});}
+      function fitWordCanvases(){var dpr=Math.min(window.devicePixelRatio||1,2),state=wordStates[activeWordIndex];if(!state||!state.cell.classList.contains('active'))return;var r=state.cell.getBoundingClientRect();state.canvas.width=Math.round(r.width*dpr);state.canvas.height=Math.round(r.height*dpr);state.ctx.setTransform(dpr,0,0,dpr,0,0);drawStrokes(state.ctx,state.canvas,state.strokes);}
       function fitCanvas(){if(script==='kotoba'){fitWordCanvases();return;}var r=els.wrap.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);redraw();}
       function redraw(){drawStrokes(ctx,canvas,strokes);}
       function redrawAll(){redraw();wordStates.forEach(function(state){drawStrokes(state.ctx,state.canvas,state.strokes);});}
